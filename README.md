@@ -1,0 +1,1 @@
+Suffixarray test
