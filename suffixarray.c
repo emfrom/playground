@@ -42,18 +42,19 @@ int string_compare(const void *pointer1, const void *pointer2) {
 suffixarray suffixarray_create(char *data, size_t length) {
 
   //Create substrings
-  char **temp_storage = xmalloc(sizeof(unsigned char) * length);
+  char **temp_storage = xmalloc(sizeof(char *) * length);
   for(uint64_t i = 0; i < length ; i++)
-    temp_storage[i] = (char *) data + i;
+    temp_storage[i] = data + i;
 
   //Sort substrings
-  qsort(temp_storage, length, sizeof(unsigned char *), string_compare);
+  qsort(temp_storage, length, sizeof(char *), string_compare);
   
   //Create suffixarray
   suffixarray retval;
   retval = xmalloc(sizeof(struct suffixarray_s));
   retval->length = length;
-  retval->memb = malloc(sizeof(uint64_t));
+  retval->memb = xmalloc(sizeof(uint64_t) * length);
+  
   for(uint64_t i = 0; i < length ; i++)
     retval->memb[i] = (uint64_t) (temp_storage[i] - data);
 
@@ -68,8 +69,27 @@ void suffixarray_destroy(suffixarray sa) {
   free(sa);
 }
 
+
+
 #ifdef TEST_SUFFIXARRAY
 int main(int arg_count, char **arg_vector) {
+  if(arg_count < 2) {
+    printf("needs argument\n");
+    return EXIT_SUCCESS;
+  }
+
+
+  char *string = (char *)arg_vector[1];
+  int len = strlen(arg_vector[1]);
+
+  suffixarray sa = suffixarray_create(string, len);
+
+  for(int i = 0; i < sa->length ; i++)
+    printf("%d: %s\n", i, string + sa->memb[i]);
+				      
+
+  suffixarray_destroy(sa);
+  
   return EXIT_FAILURE;
 }
 #endif
