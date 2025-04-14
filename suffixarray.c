@@ -63,6 +63,10 @@ suffixarray suffixarray_create(char *data, size_t length) {
   return retval; 
 }
 
+void suffixarray_destroy(suffixarray sa) {
+  free(sa->memb);
+  free(sa);
+}
 
 #ifdef TEST_SUFFIXARRAY
 int main(int arg_count, char **arg_vector) {
