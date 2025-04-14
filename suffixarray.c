@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define TEST_SUFFIXARRAY
 
@@ -10,14 +11,17 @@
 
 #if PTR_MAX > UINT64_T
 #error "ptr bigger than u64"
-#fi
+#endif
 
 #if 256 < UCHAR_MAX
 #error "uchar size assumption failed"
 #endif
 
 
-//This is an initial naive sort
+/**
+   - This is an initial naive sort
+   - Can only handle strings, not binary data
+*/
 
 #include "xmalloc.c"
 
@@ -26,23 +30,37 @@ struct suffixarray_s {
   uint64_t *memb;
 };
 
-typedef struct suffixarray_s suffixarray;
+typedef struct suffixarray_s *suffixarray;
+
+int string_compare(const void *pointer1, const void *pointer2) {
+  char *string1 = *(char **) pointer1;
+  char *string2 = *(char **) pointer2;
+
+  return strcmp(string1, string2);
+}
 
 suffixarray suffixarray_create(char *data, size_t length) {
 
   //Create substrings
-  unsigned char * temp_storage = xmalloc(sizeof(unsigned char) * length);
+  char **temp_storage = xmalloc(sizeof(unsigned char) * length);
   for(uint64_t i = 0; i < length ; i++)
-    temp_storage[i] = data + i;
+    temp_storage[i] = (char *) data + i;
 
+  //Sort substrings
+  qsort(temp_storage, length, sizeof(unsigned char *), string_compare);
+  
   //Create suffixarray
-  suffixarray sa = xmalloc(sizeof(struct suffixarray_s));
-  
-			   
+  suffixarray retval;
+  retval = xmalloc(sizeof(struct suffixarray_s));
+  retval->length = length;
+  retval->memb = malloc(sizeof(uint64_t));
+  for(uint64_t i = 0; i < length ; i++)
+    retval->memb[i] = (uint64_t) (temp_storage[i] - data);
 
-  
+
   xfree(temp_storage);
-  
+
+  return retval; 
 }
 
 
