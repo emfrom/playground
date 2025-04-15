@@ -1,3 +1,4 @@
+#define _GNU_SOURCE //For qsort_r 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -14,17 +15,27 @@ struct suffixarray_s {
 
 typedef struct suffixarray_s *suffixarray;
 
+
+int compare_first_char(const void *pointer1, const void *pointer2, void *data) {
+  int index1 = * (int *)pointer1;
+  int index2 = * (int *)pointer2;
+  char *string = data;
+
+  return string[index1] - string[index2];
+}
+
+
 suffixarray suffixarray_create(char *data, size_t length) {
 
   //Create suffixarray
-  suffixarray retval;
-  retval = xmalloc(sizeof(struct suffixarray_s));
-  retval->length = length;
-  retval->index = xmalloc(sizeof(int) * length);
+  suffixarray sa;
+  sa = xmalloc(sizeof(struct suffixarray_s));
+  sa->length = length;
+  sa->index = xmalloc(sizeof(int) * length);
 
   //Create substrings indices
   for(int i = 0; i < length ; i++)
-    retval->index[i] = i;
+    sa->index[i] = i;
   
   /**
    * Prefix sort O(n log n)
@@ -37,12 +48,27 @@ suffixarray suffixarray_create(char *data, size_t length) {
    * - 
    */
 
-  // Initial ranking (with sort)
+  //Sort index
+  // qsort is used to reduce overllcomplexity (not sorting tuples)
+  // the sort is done only on first char
+  qsort_r(sa->index, length, sizeof(int), compare_first_char, data);
+  
+  // Initial ranking 
+  int *ranks = xmalloc(sizeof(int) * length);
+  int current_rank = 1; //Start at one, 0 is empty space
+  ranks[0] = 1;
+  for(int i = 1; i < length ; i++) {
+    if(data[sa->index[i]] != data[sa->index[i - 1]])
+       current_rank += 1;
 
-  // -- Loop over comparison lenghts (start 1)
+    ranks[i] = current_rank;
+  }
+
+  
+  
 
 
-  return retval; 
+  return sa; 
 }
 
 void suffixarray_destroy(suffixarray sa) {
