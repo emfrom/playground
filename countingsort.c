@@ -57,6 +57,63 @@ uint8_t *countingsort_example(uint8_t *array, size_t size) {
   return array;
 }
 
+
+/**
+ *  Unthreaaded counting sort
+ */ 
+void *countingsort(void *data, size_t nmembers, size_t size,
+		   uint8_t (*key_func)(void *element, void *userdata),
+		   void *userdata) {
+  //Store for counts
+  size_t counts[UINT8_MAX + 1] = { 0 };
+
+  //Keys
+  // - Keys are cached
+  uint8_t *keys = xmalloc(nmembers);
+  
+  //Counting pass 
+  for (size_t i = 0; i < nmembers; i++) {
+    void *element = (char *)data + i * size;
+    keys[i] = key_func(element, userdata); 
+
+    counts[keys[i]] += 1;
+  }
+
+  //Prefix sum pass
+  for(size_t i=1; i <= UINT8_MAX; i++)
+    counts[i] += counts[i - 1];
+
+  //Result
+  // not in place
+  uint8_t *result = xmalloc(size*nmembers);
+
+  //Insert pass
+  // - unsigned safe decrement iteration
+  for(size_t i=nmembers;;) {
+    i--;
+
+    //Key
+    uint8_t key = 
+    
+    //Symbol 
+    uint8_t j = array[i];
+
+    //Decrement count
+    counts[j] -= 1;
+
+    result[counts[j]] = array[i]; 
+
+    //When 0 is done, finished
+    if(!i)
+      break;
+  }
+
+  //All done
+  free(keys);
+
+  return result;
+}
+
 #ifdef COUNTINGSORT_TEST
 
 int main(int argc, char **argv) {
