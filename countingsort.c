@@ -1,6 +1,11 @@
 #ifndef COUNTINGSORT_C
 #define COUNTINGSORT_C
 
+#ifdef UNIT_TEST
+#undefine UNIT_TEST
+#define COUNTINGSORT_TEST
+#endif
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -117,7 +122,6 @@ void *countingsort_u8(void *data, size_t nmembers, size_t size,
   return result;
 }
 
-#define COUNTINGSORT_TEST
 #ifdef COUNTINGSORT_TEST
 
 uint8_t key_function(void *element, void *userdata) {
