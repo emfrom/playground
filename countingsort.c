@@ -60,10 +60,12 @@ uint8_t *countingsort_example(uint8_t *array, size_t size) {
 
 /**
  *  Unthreaaded counting sort
+ *
+ * Sorts data based on a u8 key
  */ 
-void *countingsort(void *data, size_t nmembers, size_t size,
-		   uint8_t (*key_func)(void *element, void *userdata),
-		   void *userdata) {
+void *countingsort_u8(void *data, size_t nmembers, size_t size,
+		      uint8_t (*key_func)(void *element, void *userdata),
+		      void *userdata) {
   //Store for counts
   size_t counts[UINT8_MAX + 1] = { 0 };
 
@@ -85,23 +87,24 @@ void *countingsort(void *data, size_t nmembers, size_t size,
 
   //Result
   // not in place
-  uint8_t *result = xmalloc(size*nmembers);
+  char *result = xmalloc(size*nmembers);
 
   //Insert pass
   // - unsigned safe decrement iteration
-  for(size_t i=nmembers;;) {
+  for(size_t i = nmembers;;) {
     i--;
 
-    //Key
-    uint8_t key = 
+    //Readability
+    uint8_t j = keys[i]; //Key value
+    void *source = (char *)data + i * size;
     
-    //Symbol 
-    uint8_t j = array[i];
-
+    
     //Decrement count
     counts[j] -= 1;
+    void *destination = result + counts[j]*size;
 
-    result[counts[j]] = array[i]; 
+    //copy over
+    memcpy(destination, source, size);
 
     //When 0 is done, finished
     if(!i)
