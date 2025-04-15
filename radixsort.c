@@ -1,6 +1,8 @@
 #ifndef RADIXSORT_C
 #define RADIXSORT_C
 
+/* I've botched this completely, DO NOT USE */
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
