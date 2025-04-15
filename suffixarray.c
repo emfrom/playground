@@ -1,12 +1,15 @@
-#define _GNU_SOURCE //For qsort_r 
+#ifndef SUFFIXARRAY_C
+#define SUFFIXARRAY_C
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define TEST_SUFFIXARRAY
+#define SUFFIXARRAY_TEST
 
 #include "xmalloc.c"
+#include "radixsort.c"
 
 struct suffixarray_s {
   int length;
@@ -15,14 +18,6 @@ struct suffixarray_s {
 
 typedef struct suffixarray_s *suffixarray;
 
-
-int compare_first_char(const void *pointer1, const void *pointer2, void *data) {
-  int index1 = * (int *)pointer1;
-  int index2 = * (int *)pointer2;
-  char *string = data;
-
-  return string[index1] - string[index2];
-}
 
 
 suffixarray suffixarray_create(char *data, size_t length) {
@@ -38,7 +33,7 @@ suffixarray suffixarray_create(char *data, size_t length) {
     sa->index[i] = i;
   
   /**
-   * Prefix sort O(n log n)
+   * Prefix sort O(n log n), with radix or counting sort 
    *
    * Prefix sort exploints symmetries in the data sort faster
    *
@@ -48,8 +43,10 @@ suffixarray suffixarray_create(char *data, size_t length) {
    * - 
    */
 
+ 
+  
   //Sort index
-  // qsort is used to reduce overllcomplexity (not sorting tuples)
+  // qsort is used to reduce overall complexity (not sorting tuples)
   // the sort is done only on first char
   qsort_r(sa->index, length, sizeof(int), compare_first_char, data);
   
@@ -64,10 +61,13 @@ suffixarray suffixarray_create(char *data, size_t length) {
     ranks[i] = current_rank;
   }
 
-  
+  //List is now sorted and ranked
+
   
 
+  
 
+  free(ranks);
   return sa; 
 }
 
@@ -78,7 +78,7 @@ void suffixarray_destroy(suffixarray sa) {
 
 
 
-#ifdef TEST_SUFFIXARRAY
+#ifdef SUFFIXARRAY_TEST
 int main(int arg_count, char **arg_vector) {
   if(arg_count < 2) {
     printf("needs argument\n");
@@ -99,3 +99,4 @@ int main(int arg_count, char **arg_vector) {
   return EXIT_FAILURE;
 }
 #endif
+#endif /* SUFFIXARRAY_C */
