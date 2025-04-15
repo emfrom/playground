@@ -1,6 +1,13 @@
 #ifndef SUFFIXARRAY_C
 #define SUFFIXARRAY_C
 
+/*
+  TODO: Sorting by ranks do not work, needs differently written radix sort
+  TODO: Generating ranks do not work, needs a new function
+*/
+
+
+#include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -12,13 +19,80 @@
 #include "radixsort.c"
 
 struct suffixarray_s {
-  int length;
-  int *index;
+  size_t length;
+  uint8_t *data;
+  uint64_t *indices;
 };
 
 typedef struct suffixarray_s *suffixarray;
 
+//For the inital ranking of the suffixes
+uint16_t get_initial(uint64_t index, void *base, void *userdata) {
+  suffixarray sa = base;
 
+  if(index + 1 == sa->length)
+    return sa->data[index] << 8;
+
+  return sa->data[index] << 8 | sa->data[index + 1];
+}
+
+//Data needed to generate sorting tuples (i.e. u16 from 2xu8)
+struct rank_data_s {
+  uint64_t *ranks;
+  uint64_t prefix_length;
+};
+
+/*
+  sa   = [0, 2, 4, 3, 5, 1]
+  rank = [1, 3, 1, 2, 1, 2]
+
+sa[i] suffix   rank[sa[i]]  rank[sa[i]+1]
+ 0   acabab       1         3    
+ 2     abab       1         2
+ 4       ab       1         2
+ 3      bab       2         1
+ 5        b       2         0
+ 1    cabab       3         1
+ */
+uint16_t get_rank_tuple(uint64_t i, void *base, void *userdata) {
+  suffixarray sa = base;
+  struct rank_data_s *rank_data = userdata;
+  uint16_t tuple;
+
+  //TODO: BUG: uint16 only works for up to 256 char lenght (max rank == length)
+  tuple = (( rank_data->ranks[sa->indices[i]]) & 0x0F) << 8;
+    
+  uint64_t k = i + rank_data->prefix_length;
+
+  if(k >= sa->length)
+    return tuple;
+
+  //TODO: BUG: uint16 only works for up to 256 char lenght (max rank == length)
+  return tuple | (rank_data->ranks[sa->indices[i]] & 0x0F);
+}
+
+
+//Convert ordered indexes into ranks
+uint64_t *rank_from_index(suffixarray sa, int *sorted) {
+  uint64_t *ranks = xmalloc(sizeof(uint64_t)*sa->length);
+
+  uint64_t current_rank = 1; //start at 1
+  ranks[0] = 1;
+
+  for(uint64_t i = 1; i < sa->length ; i++) {
+    //TODO: BUG: This doesnt work (how did I come up with this?)
+    if(sa->data[sa->indices[i]] != sa->data[sa->indices[i - 1]])
+       current_rank += 1;
+
+    ranks[i] = current_rank;
+  }
+
+  //All elements in the rank array have a unique rank
+  // implies last rank == lenght
+  *sorted = current_rank == sa->length ? 1 : 0;
+    
+  return ranks;
+}
 
 suffixarray suffixarray_create(char *data, size_t length) {
 
@@ -26,11 +100,7 @@ suffixarray suffixarray_create(char *data, size_t length) {
   suffixarray sa;
   sa = xmalloc(sizeof(struct suffixarray_s));
   sa->length = length;
-  sa->index = xmalloc(sizeof(int) * length);
-
-  //Create substrings indices
-  for(int i = 0; i < length ; i++)
-    sa->index[i] = i;
+  sa->data = (uint8_t *)data;
   
   /**
    * Prefix sort O(n log n), with radix or counting sort 
@@ -38,41 +108,23 @@ suffixarray suffixarray_create(char *data, size_t length) {
    * Prefix sort exploints symmetries in the data sort faster
    *
    * Assumptions/definitions:
-   *
-   * - Let "rank" be value of char, same char has same rank. TODO: 0 and out of bounds ranks?
-   * - 
    */
-
- 
+  sa->indices = rsort_index(sa, length, get_initial, NULL);
   
-  //Sort index
-  // qsort is used to reduce overall complexity (not sorting tuples)
-  // the sort is done only on first char
-  qsort_r(sa->index, length, sizeof(int), compare_first_char, data);
+  
   
   // Initial ranking 
-  int *ranks = xmalloc(sizeof(int) * length);
-  int current_rank = 1; //Start at one, 0 is empty space
-  ranks[0] = 1;
-  for(int i = 1; i < length ; i++) {
-    if(data[sa->index[i]] != data[sa->index[i - 1]])
-       current_rank += 1;
-
-    ranks[i] = current_rank;
-  }
+     
 
   //List is now sorted and ranked
 
   
 
-  
-
-  free(ranks);
   return sa; 
 }
 
 void suffixarray_destroy(suffixarray sa) {
-  free(sa->index);
+  free(sa->indices);
   free(sa);
 }
 
@@ -92,7 +144,7 @@ int main(int arg_count, char **arg_vector) {
   suffixarray sa = suffixarray_create(string, len);
 
   for(int i = 0; i < sa->length ; i++)
-    printf("%d: %s\n", sa->index[i], string + sa->index[i]);
+    printf("%lu: %s\n", sa->indices[i], string + sa->indices[i]);
 
   suffixarray_destroy(sa);
   
