@@ -117,18 +117,39 @@ void *countingsort_u8(void *data, size_t nmembers, size_t size,
   return result;
 }
 
+#define COUNTINGSORT_TEST
 #ifdef COUNTINGSORT_TEST
+
+uint8_t key_function(void *element, void *userdata) {
+  char *text = element;
+
+  return ((uint8_t) *text) - 1; // -1 => NUL token will be sorted to end of asciz string
+}
+
 
 int main(int argc, char **argv) {
 
   if(2 > argc)
     return EXIT_FAILURE;
 
+  //Test simple function
+#if 0
   //Sort argv[1] in place
   printf("%s: ", argv[1]);
   countingsort_example((uint8_t *) argv[1], strlen(argv[1]));
   printf("%s\n", argv[1]);
+#endif
 
+  //Single threaded
+  char *sorted;
+  sorted = countingsort_u8(argv[1], strlen(argv[1]) + 1, sizeof(char), key_function, NULL);
+
+  printf("%s: %s\n", argv[1], sorted);
+
+  free(sorted);
+
+  
+  
   return EXIT_SUCCESS;
 }
 
