@@ -110,7 +110,8 @@ void radixsort_asciz(char **ascizs, size_t nstrings, size_t prefixlen) {
   free(strings);
 }
 
-#ifdef RADIXSORT_TEST
+#if 1
+//def RADIXSORT_TEST
 
 uint32_t convert(char *string) {
   uint32_t retval = 0;
@@ -125,13 +126,23 @@ uint32_t convert(char *string) {
   return retval;  
 }
 
-
+#include "sorttest.c"
 
 int main(int argc, char **argv) {
 
-  if(argc < 2)
-    return EXIT_FAILURE;
+  //No args, use test data
+  if(argc < 2) {
+    size_t num_words;
+    char **data = load_testdata(&num_words);
 
+    radixsort_asciz(data, num_words,0);
+
+    free(data);
+
+    printf("All sorted");
+  }
+  else {
+    //Just sort command line arguments
   argv++;
   argc--;
   
@@ -153,6 +164,7 @@ int main(int argc, char **argv) {
   
   free(ints);
   free(sorted);
+  }
   
   return EXIT_SUCCESS;
 }
