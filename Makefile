@@ -15,11 +15,12 @@ OBJ := $(TARGETS:%=%.o)
 TESTS := $(TARGETS:%=%.test)
 
 # Default target
-all: $(OBJ) $(TESTS)
+#all: $(OBJ) $(TESTS)
+all: $(TESTS)
 
 # Compile .c to .o without -DUNIT_TEST
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+#%.o: %.c
+#	$(CC) $(CFLAGS) -c $< -o $@
 
 # Compile .c to .test with -DUNIT_TEST
 %.test: %.c
