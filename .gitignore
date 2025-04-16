@@ -4,3 +4,4 @@
 /sorttest
 *.o
 *.test
+/gmon.out
