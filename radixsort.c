@@ -3,7 +3,7 @@
 
 #ifdef UNIT_TEST
 #define RADIXSORT_TEST
-#undefine UNIT_TEST
+#undef UNIT_TEST
 #endif
 
 #include <stddef.h>

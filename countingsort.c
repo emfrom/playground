@@ -2,7 +2,7 @@
 #define COUNTINGSORT_C
 
 #ifdef UNIT_TEST
-#undefine UNIT_TEST
+#undef UNIT_TEST
 #define COUNTINGSORT_TEST
 #endif
 
