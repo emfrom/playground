@@ -17,9 +17,9 @@ char **load_testdata(size_t *num_strings) {
   size_t lines_loaded;
 
   //The collected works of shakespeare, one word per line.
-  // Should sort in < 1s on a modern machine, but big enough n for asymptotic behavior
-  // (dont bubble sort it)
-  char **lines = xload_lines("Shakespeare.txt", &lines_loaded);
+  // Should sort in < 0.5s with qsort on a modern machine, but big enough n for asymptotic behavior
+  // (go ahead, bubble sort it)
+  char **lines = xload_lines("sorttest_data.txt", &lines_loaded);
 
   if(NULL != num_strings)
     *num_strings = lines_loaded;
