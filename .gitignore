@@ -2,3 +2,5 @@
 /suffixarray
 /countingsort
 /sorttest
+*.o
+*.test
