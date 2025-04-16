@@ -1,4 +1,4 @@
-### Playground
+# Playground
 
 This is a project with a myriad of codesnippets.
 
@@ -27,7 +27,3 @@ TODO: Avoid free/malloc more than once each
 ## x????
 
 Utilty snippets that all call exit() if they are not happy
-
-
-
-
