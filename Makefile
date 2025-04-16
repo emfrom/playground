@@ -27,6 +27,6 @@ all: $(OBJ) $(TESTS)
 
 # Clean up
 clean:
-	rm -f $(OBJ) $(TESTS)
+	rm -f $(OBJ) $(TESTS) gmon.out
 
 .PHONY: all clean
