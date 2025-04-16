@@ -36,9 +36,9 @@ uint8_t radixsort_getplace(void *element, void *userdata) {
 void *radixsort(void *data, size_t nmembers, size_t size) {
   void *old = data;
   void *new;
-  
-  for(size_t digit_place = size;;) {
-    digit_place -= 1;
+
+  //Only works for little endian
+  for(size_t digit_place = 0; digit_place < size ; digit_place++) {
 
     new = countingsort_u8(old, nmembers, size, radixsort_getplace, &digit_place);
 
@@ -47,9 +47,6 @@ void *radixsort(void *data, size_t nmembers, size_t size) {
       free(old);
 
     old = new;
-    
-    if(!digit_place)
-      break;
   }
 
   return new;
