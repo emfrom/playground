@@ -124,6 +124,7 @@ void *countingsort_u8(void *data, size_t nmembers, size_t size,
 
 #ifdef COUNTINGSORT_TEST
 
+
 uint8_t key_function(void *element, void *userdata) {
   char *text = element;
 

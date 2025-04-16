@@ -115,6 +115,19 @@ void radixsort_asciz(char **ascizs, size_t nstrings, size_t prefixlen) {
 
 #ifdef RADIXSORT_TEST
 
+uint32_t convert(char *string) {
+  uint32_t retval = 0;
+
+  for(int i=0; i < 4; i++) {
+    retval |= string[i] << (8*(3-i));
+
+    if(!string[i])
+      break;
+  }
+
+  return retval;  
+}
+
 
 
 int main(int argc, char **argv) {
@@ -122,11 +135,28 @@ int main(int argc, char **argv) {
   if(argc < 2)
     return EXIT_FAILURE;
 
+  argv++;
+  argc--;
+  
+  uint32_t *ints = malloc(sizeof(uint32_t)*argc);
+  for(int i=0;i<argc;i++)
+    ints[i] = convert(argv[i]);
+
+  //Sort numbersa
+  uint32_t *sorted = radixsort(ints, argc, sizeof(uint32_t));
+
+  //Sort text 
   radixsort_asciz(argv, argc, 0);
 
+
+
   for(int i=0; i < argc; i++) 
-    printf("%s\n", argv[i]);   
- 
+    printf("%8.8x : %s\n", sorted[i], argv[i]);
+  
+  
+  free(ints);
+  free(sorted);
+  
   return EXIT_SUCCESS;
 }
 
