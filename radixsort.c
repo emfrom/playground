@@ -113,8 +113,7 @@ void radixsort_asciz(char **ascizs, size_t nstrings, size_t prefixlen) {
   free(strings);
 }
 
-#if 1
-//def RADIXSORT_TEST
+#ifdef RADIXSORT_TEST
 
 
 
@@ -123,9 +122,12 @@ int main(int argc, char **argv) {
   if(argc < 2)
     return EXIT_FAILURE;
 
-  
-  
+  radixsort_asciz(argv, argc, 0);
 
+  for(int i=0; i < argc; i++) 
+    printf("%s\n", argv[i]);   
+ 
+  return EXIT_SUCCESS;
 }
 
 #endif
