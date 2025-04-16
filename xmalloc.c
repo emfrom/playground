@@ -1,6 +1,12 @@
 #ifndef XMALLOC_C
 #define XMALLOC_C
 
+#ifdef UNIT_TEST
+#define XMALLOC_TEST
+#undef UNIT_TEST
+#endif
+
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -75,6 +81,10 @@ void *xrealloc(void *ptr, size_t new_size) {
 
     return new_ptr;
 }
+#endif
+
+#ifdef XMALLOC_TEST
+int main() { return EXIT_FAILURE; }
 #endif
 
 #endif // XMALLOC_C 

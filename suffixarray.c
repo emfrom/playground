@@ -1,18 +1,15 @@
 #ifndef SUFFIXARRAY_C
 #define SUFFIXARRAY_C
-
-/*
-  TODO: Generating ranks do not work, needs a new function
-*/
-
-
 #include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef UNIT_TEST
 #define SUFFIXARRAY_TEST
+#undef UNIT_TEST
+#endif 
 
 #include "xmalloc.c"
 #include "radixsort.c"
@@ -47,7 +44,7 @@ suffixarray suffixarray_create(char *data, size_t length) {
 
   //Store indices
   sa->indices = xmalloc(sizeof(size_t) * length);
-  for(size_t i; i < length; i++)
+  for(size_t i = 0; i < length; i++)
     sa->indices[i] = suffixes[i] - data;
     
   free(suffixes);

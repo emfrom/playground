@@ -110,8 +110,7 @@ void radixsort_asciz(char **ascizs, size_t nstrings, size_t prefixlen) {
   free(strings);
 }
 
-#if 1
-//def RADIXSORT_TEST
+#ifdef RADIXSORT_TEST
 
 uint32_t convert(char *string) {
   uint32_t retval = 0;
