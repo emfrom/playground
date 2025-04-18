@@ -3,6 +3,7 @@
 
 //Naive trie implementation using only a-z 
 
+#include <stddef.h>
 #ifdef UNIT_TEST
 #define TRIEAZ_TEST
 #undef UNIT_TEST
@@ -12,9 +13,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "xmalloc.c"
+
 
 typedef struct trieaz_s *trieaz;
-
 struct trieaz_s {
   char character;
   char nchildren;
@@ -30,6 +32,17 @@ const char TRIE_ROOT = 0xFF;
 const char CHILDLIST_MAX = 'z' - 'a';
 const char CHILDLIST_SIZE = CHILDLIST_MAX + 1;
 #define CHILDLIST_INDEX(c) ((c) - 'a')
+
+// Make a new trie node
+trieaz trieaz_create(char c) {
+  trieaz new = xmalloc(sizeof(struct trieaz_s));
+
+  new->character = c;
+  new->nchildren = 0;
+  new->children = NULL;
+
+  return new;
+}
 
 // Will return position c is at
 // OR position it should be at
@@ -93,12 +106,22 @@ char trieaz_helper_getpos(trieaz node, char c) {
 
 // Takes a node and a char and returns the next node or char
 // Adding if needed
+// Returns NULL if c == NUL
 trieaz trieaz_add_node(trieaz node, char c) {
-  
+  if('\0' == c)
+    return NULL;
 }
 
+// Takes a root node and add's a word
+//
+// Returns the root
+trieaz trieaz_insert(trieaz root, char *word) {
+  //New trie?
+  if(NULL == root)
+    root = trieaz_create(TRIE_ROOT);
+  
+  trieaz temp = trieaz_add_node(root, *word);
 
-trieaz trieaz_add(trieaz root, char *word) {
   
 
   
