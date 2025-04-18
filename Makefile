@@ -4,7 +4,7 @@ CFLAGS ?= -Wall -g -pg
 LDFLAGS ?=
 
 # List of source files (targets)
-TARGETS := countingsort radixsort sorttest suffixarray xload xmalloc
+TARGETS := countingsort radixsort sorttest suffixarray xload xmalloc trieaz
 
 
 
