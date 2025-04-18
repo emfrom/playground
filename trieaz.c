@@ -4,6 +4,7 @@
 //Naive trie implementation using only a-z 
 
 #include <stddef.h>
+#include <string.h>
 #ifdef UNIT_TEST
 #define TRIEAZ_TEST
 #undef UNIT_TEST
@@ -26,18 +27,18 @@ struct trieaz_s {
 // Use a root node marker
 // Since this is "supposed to be" space efficient,
 //  edges cannot store the char values
-const char TRIE_ROOT = 0xFF;
+const char TRIE_ROOT = 0x00;
 
 //
 const char CHILDLIST_MAX = 'z' - 'a';
 const char CHILDLIST_SIZE = CHILDLIST_MAX + 1;
 #define CHILDLIST_INDEX(c) ((c) - 'a')
 
-// Make a new trie node
-trieaz trieaz_create(char c) {
+// Make a new trie root
+trieaz trieaz_create() {
   trieaz new = xmalloc(sizeof(struct trieaz_s));
 
-  new->character = c;
+  new->character = TRIE_ROOT;
   new->nchildren = 0;
   new->children = NULL;
 
@@ -72,26 +73,20 @@ char trieaz_helper_getpos(trieaz node, char c) {
   if( node->children[node->nchildren - 1].character < c)
     return node->nchildren;
 
+  //
   // Search
+  //
   
-  // No character is every stored at an index higher than it's index in a full array
+  // No character is ever stored at an index higher than it's index in a full array
   char high=CHILDLIST_INDEX(c);
 
-  // No character is ever stored lower than it's index in a full array - (26 - nchildren) (or 0)
+  // No character is ever stored lower than it's index in a full array - free spaces in the array
+  // max(index - ( 26 - nchildren), 0 ) 
   char low = CHILDLIST_INDEX(c) - ( CHILDLIST_SIZE - node->nchildren);
   if(low < 0)
     low = 0;
 
-  //Linear search faster for small arrays
-  if(4 > (high - low)) {
-    for(char i = low; i < high; i++)
-      if(node->children[i].character < c)
-	return i;
-
-    return high;
-  }
-
-  //Ordinary bsearch 
+  //Ordinary bsearch, 5 steps ceiling
   while (low < high) {
     char mid = (low + high) >> 1;
 
@@ -110,6 +105,33 @@ char trieaz_helper_getpos(trieaz node, char c) {
 trieaz trieaz_add_node(trieaz node, char c) {
   if('\0' == c)
     return NULL;
+
+  
+  char array_position = trieaz_helper_getpos(node, c);
+
+  //Check if we found c
+  if(array_position < node->nchildren && node->children[array_position].character == c)
+    return node->children + array_position;
+
+  
+  //Add new to end
+  node->children = xrealloc(node->children, sizeof(struct trieaz_s) * (node->nchildren + 1));
+
+  // Array move needed ?
+  if(array_position < node->nchildren)
+    //Manual move 
+    for(int i=node->nchildren; i > array_position; i--)
+      memcpy(node->children + i, node->children + i - 1, sizeof(struct trieaz_s));
+
+  //Assign values   
+  node->children[array_position].character = c;
+  node->children[array_position].nchildren = 0;
+  node->children[array_position].children = NULL;
+
+  node->nchildren += 1;
+  
+  return node->children + array_position;
+
 }
 
 // Takes a root node and add's a word
@@ -118,9 +140,14 @@ trieaz trieaz_add_node(trieaz node, char c) {
 trieaz trieaz_insert(trieaz root, char *word) {
   //New trie?
   if(NULL == root)
-    root = trieaz_create(TRIE_ROOT);
+    root = trieaz_create();
   
-  trieaz temp = trieaz_add_node(root, *word);
+  trieaz temp = root;
+
+  while(NULL != (temp = trieaz_add_node(root, *word)))
+    word++;
+
+  
 
   
 
