@@ -7,6 +7,35 @@
 // Wastes too much time and doesnt really save all that much space
 
 
+// New design
+//
+// No human language using latin alphabet (i.e. <32 tokens) will ever have
+// anywhere near 2^32 words.
+//
+// The following info is needed
+// 1 bit - Is a node a word termination
+// 5 bits - how many children does node have
+// 26 bits - which letter children are present
+// i.e. <32 bits
+//
+// This is the first 32 bit word in an array of 1 + nchildren 32 bit words
+// Where each of the words are 32-bit pointers to other children
+//
+// Needs: 32-bit memarena for allocations
+//
+// Space is ~30-40% of naive implementation
+// Speed is 2x naive (minimum)
+//
+// Also opens up the possibilty of having 8bit alphabets without to much
+// overhead.
+// Can look at things liek how a code generator "talks",
+// what kinds of words it uses. A word being anything said up until a branch/jmp
+// instruction.
+//
+// Fun stuff
+
+
+
 #include <stddef.h>
 #include <string.h>
 #ifdef UNIT_TEST
