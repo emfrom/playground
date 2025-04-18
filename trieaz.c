@@ -1,7 +1,11 @@
 #ifndef TRIEAZ_C
 #define TRIEAZ_C
 
-//Naive trie implementation using only a-z 
+// Naive trie implementation using only a-z
+
+// Realised that the naive implementation is braindead
+// Wastes too much time and doesnt really save all that much space
+
 
 #include <stddef.h>
 #include <string.h>
@@ -22,6 +26,7 @@ typedef struct trieaz_s *trieaz;
 struct trieaz_s {
   char character;
   char nchildren;
+  char is_word; //A word ends on this node
   trieaz children; 
 };
 
@@ -42,6 +47,7 @@ trieaz trieaz_create() {
   new->character = TRIE_ROOT;
   new->nchildren = 0;
   new->children = NULL;
+  new->is_word = 0;
 
   return new;
 }
@@ -104,9 +110,10 @@ char trieaz_helper_getpos(trieaz node, char c) {
 // Adding if needed
 // Returns NULL if c == NUL
 trieaz trieaz_add_node(trieaz node, char c) {
-  if('\0' == c)
+  if('\0' == c) {
+    node->is_word = 1;
     return NULL;
-
+  }
   
   char array_position = trieaz_helper_getpos(node, c);
 
@@ -128,6 +135,7 @@ trieaz trieaz_add_node(trieaz node, char c) {
   node->children[array_position].character = c;
   node->children[array_position].nchildren = 0;
   node->children[array_position].children = NULL;
+  node->is_word = 0;
 
   node->nchildren += 1;
   
@@ -142,6 +150,10 @@ trieaz trieaz_insert(trieaz root, char *word) {
   //New trie?
   if(NULL == root)
     root = trieaz_create();
+
+  //Actually something to add?
+  if('\0' == *word)
+    return root;
   
   trieaz temp = root;
 
@@ -149,6 +161,24 @@ trieaz trieaz_insert(trieaz root, char *word) {
     word++;
 
   return root;
+}
+
+void trieaz_destroy(trieaz node) {
+  if(node->nchildren == 0)
+    return;
+  
+  for(int i=0; i < node->nchildren; i++)
+    trieaz_destroy(node->children + i);
+
+  free(node->children);
+
+  return;
+
+}
+
+trieaz trieaz_remove(trieaz node, char *word) {
+
+
 }
 
 
