@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "xmalloc.c"
 
@@ -99,7 +100,7 @@ char trieaz_helper_getpos(trieaz node, char c) {
   return low;
 }
 
-// Takes a node and a char and returns the next node or char
+// Takes a node and a char and returns the corresponding node 
 // Adding if needed
 // Returns NULL if c == NUL
 trieaz trieaz_add_node(trieaz node, char c) {
@@ -114,14 +115,14 @@ trieaz trieaz_add_node(trieaz node, char c) {
     return node->children + array_position;
 
   
-  //Add new to end
+  //Grow array 
   node->children = xrealloc(node->children, sizeof(struct trieaz_s) * (node->nchildren + 1));
 
   // Array move needed ?
   if(array_position < node->nchildren)
-    //Manual move 
-    for(int i=node->nchildren; i > array_position; i--)
-      memcpy(node->children + i, node->children + i - 1, sizeof(struct trieaz_s));
+    memmove(node->children + array_position + 1,
+	    node->children + array_position,
+	    (node->nchildren - array_position)*sizeof(struct trieaz_s));
 
   //Assign values   
   node->children[array_position].character = c;
@@ -144,15 +145,10 @@ trieaz trieaz_insert(trieaz root, char *word) {
   
   trieaz temp = root;
 
-  while(NULL != (temp = trieaz_add_node(root, *word)))
+  while(NULL != (temp = trieaz_add_node(temp, *word)))
     word++;
 
-  
-
-  
-
-  
-  return NULL;
+  return root;
 }
 
 
